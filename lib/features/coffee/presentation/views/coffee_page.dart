@@ -9,8 +9,8 @@ class CoffeePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<CoffeeCubit>.value(
-      value: context.read<CoffeeCubit>()..loadRandomCoffeeImage(),
-      child: CoffeeView(),
+      value: context.read<CoffeeCubit>(),
+      child: const CoffeeView(),
     );
   }
 }

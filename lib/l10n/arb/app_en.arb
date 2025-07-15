@@ -3,5 +3,57 @@
     "counterAppBarTitle": "Counter",
     "@counterAppBarTitle": {
         "description": "Text shown in the AppBar of the Counter Page"
-    }
+    },  
+    "hensellCoffeeArchitecture": "Hensell Coffee Architecture",
+    "@HensellCoffeeArchitecture": {
+    "description": "Title of the app or project"
+  },
+  "savedToFavorites": "Saved to favorites",
+  "@savedToFavorites": {
+    "description": "Snackbar or message shown when something is saved as favorite"
+  },
+  "anotherImage": "Another image",
+  "@anotherImage": {
+    "description": "Button or label for showing another random image"
+  },
+  "saveAsFavorite": "Save as favorite",
+  "@saveAsFavorite": {
+    "description": "Button or action to save the current item as favorite"
+  },
+  "viewFavorites": "View favorites",
+  "@viewFavorites": {
+    "description": "Button or action to view the user's favorite items"
+  },
+  "discoverCoffee": "Discover coffee",
+  "@discoverCoffee": {
+    "description": "Button or section to discover random or new coffee"
+  },  "savedToFavoritesExists": "This image is already in your favorites",
+  "@savedToFavoritesExists": {
+    "description": "Snackbar or modal message shown when the user tries to add a coffee image that's already a favorite"
+  },
+  "favoritesTitle": "Favorites",
+"@favoritesTitle": {
+  "description": "Title of the favorites screen in the app bar"
+},
+"noFavoritesYet": "You have no favorites yet",
+"@noFavoritesYet": {
+  "description": "Message shown when the user's favorites list is empty"
+},
+"loadingFavorites": "Loading favorites...",
+"@loadingFavorites": {
+  "description": "Message shown while the favorites list is loading"
+},
+"noInternetButFavorites": "You don't have an internet connection, but you can still view your favorites",
+"@noInternetButFavorites": {
+  "description": "Shown when there is no internet and user can access local favorites"
+},
+"tryAgain": "Try again",
+"@tryAgain": {
+  "description": "Button to retry loading a random coffee image after connection error"
+}
+
+
+
+
+
 }

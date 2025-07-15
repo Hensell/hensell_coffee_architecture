@@ -10,6 +10,7 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return InjectionContainer(
       child: MaterialApp.router(
+        debugShowCheckedModeBanner: false,
         theme: ThemeData(
           appBarTheme: AppBarTheme(
             backgroundColor: Theme.of(context).colorScheme.inversePrimary,

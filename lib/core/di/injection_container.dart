@@ -10,6 +10,7 @@ import 'package:hensell_coffee_architecture/features/coffee/domain/usecases/get_
 import 'package:hensell_coffee_architecture/features/coffee/domain/usecases/remove_favorite.dart';
 import 'package:hensell_coffee_architecture/features/coffee/domain/usecases/save_favorite.dart';
 import 'package:hensell_coffee_architecture/features/coffee/logic/cubit/coffee_cubit.dart';
+import 'package:hensell_coffee_architecture/features/coffee/logic/cubit/coffee_favorites_cubit.dart';
 
 class InjectionContainer extends StatelessWidget {
   const InjectionContainer({required this.child, super.key});
@@ -36,6 +37,11 @@ class InjectionContainer extends StatelessWidget {
               saveFavorite: SaveFavorite(
                 context.read<CoffeeRepository>(),
               ),
+              getFavorites: GetFavorites(context.read<CoffeeRepository>()),
+            ),
+          ),
+          BlocProvider<CoffeeFavoritesCubit>(
+            create: (context) => CoffeeFavoritesCubit(
               getFavorites: GetFavorites(
                 context.read<CoffeeRepository>(),
               ),

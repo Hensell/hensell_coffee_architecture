@@ -27,20 +27,6 @@ final class CoffeeError extends CoffeeState {
   List<Object?> get props => [message];
 }
 
-final class FavoritesLoading extends CoffeeState {}
+final class FavoriteSavedSuccess extends CoffeeState {}
 
-final class FavoritesLoaded extends CoffeeState {
-  const FavoritesLoaded(this.favorites);
-  final List<CoffeeFavorite> favorites;
-
-  @override
-  List<Object?> get props => [favorites];
-}
-
-final class FavoritesError extends CoffeeState {
-  const FavoritesError(this.message);
-  final String message;
-
-  @override
-  List<Object?> get props => [message];
-}
+final class FavoriteSavedExists extends CoffeeState {}
