@@ -130,6 +130,17 @@ Get the latest APK here:
 
 ---
 
+## 🛠️ To-Do
+
+Things planned for future improvements:
+
+- [ ] Add support for Flutter Web (configure Drift for web persistence)
+- [ ] Add **Settings** feature (e.g., dark mode, language selection)
+- [ ] Add integration and end-to-end tests
+- [ ] Improve README with architecture diagrams
+
+---
+
 ## 👤 Author
 
 Developed with 💙 by **Hensell**
