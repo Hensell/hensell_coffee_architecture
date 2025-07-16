@@ -1,7 +1,9 @@
 import 'dart:io';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:hensell_coffee_architecture/features/coffee/domain/usecases/fetch_random_coffee_image_url.dart';
 import 'package:hensell_coffee_architecture/features/coffee/domain/usecases/get_favorites.dart';
 import 'package:hensell_coffee_architecture/features/coffee/domain/usecases/save_favorite.dart';
@@ -61,12 +63,15 @@ class CoffeeCubit extends Cubit<CoffeeState> {
         try {
           localPath = await saveImageToDisk(originalUrl);
         } on SocketException {
-          emit(
-            const CoffeeError(
-              'no_internet_save_failed',
-            ),
+          final fileInfo = await DefaultCacheManager().getFileFromCache(
+            originalUrl,
           );
-          return;
+          if (fileInfo != null && fileInfo.file.existsSync()) {
+            localPath = fileInfo.file.path;
+          } else {
+            emit(const CoffeeError('no_internet_save_failed'));
+            return;
+          }
         } on Exception catch (e) {
           emit(CoffeeError(e.toString()));
           return;

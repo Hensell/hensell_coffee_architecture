@@ -66,19 +66,20 @@ class _FavoritesViewState extends State<FavoritesView> {
                       );
                     }
                   },
-                  leading: favorite.localPath != null
-                      ? Image.file(
-                          File(favorite.localPath!),
-                          width: 56,
-                          height: 56,
-                          fit: BoxFit.cover,
-                        )
-                      : Image.network(
-                          favorite.originalUrl,
-                          width: 56,
-                          height: 56,
-                          fit: BoxFit.cover,
-                        ),
+                  leading: SizedBox(
+                    width: 56,
+                    height: 56,
+                    child: favorite.localPath != null
+                        ? Image.file(
+                            File(favorite.localPath!),
+                            fit: BoxFit.cover,
+                          )
+                        : Image.network(
+                            favorite.originalUrl,
+                            fit: BoxFit.cover,
+                          ),
+                  ),
+
                   title: Text(favorite.originalUrl),
                   subtitle: Text(
                     favorite.createdAt.toString(),

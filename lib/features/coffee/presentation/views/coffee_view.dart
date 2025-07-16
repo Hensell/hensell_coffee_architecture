@@ -33,7 +33,10 @@ class _CoffeeViewState extends State<CoffeeView> {
         listener: (context, state) {
           if (state is FavoriteSavedSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(l10n.savedToFavorites)),
+              SnackBar(
+                key: const Key('snackbar_saved_to_favorites'),
+                content: Text(l10n.savedToFavorites),
+              ),
             );
           } else if (state is FavoriteSavedExists) {
             ScaffoldMessenger.of(context).showSnackBar(

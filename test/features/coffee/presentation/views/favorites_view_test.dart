@@ -28,7 +28,7 @@ void main() {
 
   setUp(() {
     mockCubit = MockCoffeeFavoritesCubit();
-    // <-- Aquí el stub que te salva la vida:
+
     when(() => mockCubit.loadFavorites()).thenAnswer((_) async {});
   });
 
