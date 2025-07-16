@@ -17,6 +17,14 @@
 
 ---
 
+## 📦 Download APK
+
+You can directly download the latest release here:
+
+[➡ Download APK (v1.0.0)](https://github.com/Hensell/hensell_coffee_architecture/releases/download/main/V1.0.0HensellCoffeeArchitecture.apk)
+
+---
+
 ### Preview
 
 <p align="center">
