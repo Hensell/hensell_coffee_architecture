@@ -126,7 +126,7 @@ Get the latest APK here:
 
 Developed with 💙 by **Hensell**
 
-[GitHub](https://github.com/Hensell)
+[web](https://hensell.dev)
 
 ---
 
