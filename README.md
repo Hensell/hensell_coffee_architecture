@@ -18,6 +18,14 @@
 
 ---
 
+### Preview
+
+![First screen](screenshots/3.jpg)
+![Second screen](screenshots/2.jpg)
+![third screen](screenshots/1.jpg)
+
+
+---
 ## 🏛️ Architecture
 
 - **Domain Layer:** Pure Dart entities, usecases, repositories (abstraction)
