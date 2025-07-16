@@ -20,9 +20,12 @@
 
 ### Preview
 
-![First screen](screenshots/3.jpg)
-![Second screen](screenshots/2.jpg)
-![third screen](screenshots/1.jpg)
+<p align="center">
+  <img src="screenshots/3.jpg" alt="First screen" width="300" />
+  <img src="screenshots/2.jpg" alt="Second screen" width="300" />
+  <img src="screenshots/1.jpg" alt="Third screen" width="300" />
+</p>
+
 
 
 ---
