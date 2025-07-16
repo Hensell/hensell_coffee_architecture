@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -15,8 +13,9 @@ class MockCoffeeFavoritesCubit extends Mock implements CoffeeFavoritesCubit {}
 void main() {
   late MockCoffeeFavoritesCubit mockCubit;
 
-  Widget makeTestable({required Widget child}) {
+  Widget makeTestable({required Widget child, Locale? locale}) {
     return MaterialApp(
+      locale: locale,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: BlocProvider<CoffeeFavoritesCubit>.value(
@@ -28,7 +27,6 @@ void main() {
 
   setUp(() {
     mockCubit = MockCoffeeFavoritesCubit();
-
     when(() => mockCubit.loadFavorites()).thenAnswer((_) async {});
   });
 
@@ -55,44 +53,45 @@ void main() {
 
   testWidgets('shows empty message when no favorites', (tester) async {
     final l10n = await AppLocalizations.delegate.load(const Locale('en'));
-
     when(() => mockCubit.state).thenReturn(const CoffeeFavoritesLoaded([]));
     when(
       () => mockCubit.stream,
     ).thenAnswer((_) => Stream.value(const CoffeeFavoritesLoaded([])));
 
-    await tester.pumpWidget(makeTestable(child: const FavoritesView()));
+    await tester.pumpWidget(
+      makeTestable(child: const FavoritesView(), locale: const Locale('en')),
+    );
     await tester.pumpAndSettle();
     expect(find.text(l10n.noFavoritesYet), findsOneWidget);
   });
 
   testWidgets('shows favorites and can open delete dialog', (tester) async {
     await mockNetworkImages(() async {
-      final now = DateTime(2024, 7, 15);
       final fav = CoffeeFavorite(
         id: 'id1',
         originalUrl: 'test-url',
         platform: 'android',
-        createdAt: now,
+        createdAt: DateTime(2024, 7, 15),
       );
       when(() => mockCubit.state).thenReturn(CoffeeFavoritesLoaded([fav]));
       when(
         () => mockCubit.stream,
       ).thenAnswer((_) => Stream.value(CoffeeFavoritesLoaded([fav])));
 
-      await tester.pumpWidget(makeTestable(child: const FavoritesView()));
-      await tester.pumpAndSettle();
-
-      // Checa que el favorito esté en pantalla
-      expect(find.text('test-url'), findsOneWidget);
-
-      // Intenta abrir el dialog de borrar
-      await tester.tap(find.byIcon(Icons.delete));
+      await tester.pumpWidget(
+        makeTestable(child: const FavoritesView(), locale: const Locale('en')),
+      );
       await tester.pumpAndSettle();
 
       final l10n = AppLocalizations.of(
         tester.element(find.byType(FavoritesView)),
       );
+
+      expect(find.text('test-url'), findsOneWidget);
+
+      await tester.tap(find.byIcon(Icons.delete));
+      await tester.pumpAndSettle();
+
       expect(find.text(l10n.confirmDeleteTitle), findsOneWidget);
       expect(find.text(l10n.delete), findsOneWidget);
     });
@@ -101,33 +100,37 @@ void main() {
   testWidgets('delete confirmed calls removeFavoriteById on cubit', (
     tester,
   ) async {
-    final now = DateTime(2024, 7, 15);
-    final fav = CoffeeFavorite(
-      id: 'id1',
-      originalUrl: 'test-url',
-      platform: 'android',
-      createdAt: now,
-    );
-    when(() => mockCubit.state).thenReturn(CoffeeFavoritesLoaded([fav]));
-    when(
-      () => mockCubit.stream,
-    ).thenAnswer((_) => Stream.value(CoffeeFavoritesLoaded([fav])));
+    await mockNetworkImages(() async {
+      final fav = CoffeeFavorite(
+        id: 'id1',
+        originalUrl: 'test-url',
+        platform: 'android',
+        createdAt: DateTime(2024, 7, 15),
+      );
+      when(() => mockCubit.state).thenReturn(CoffeeFavoritesLoaded([fav]));
+      when(
+        () => mockCubit.stream,
+      ).thenAnswer((_) => Stream.value(CoffeeFavoritesLoaded([fav])));
+      when(() => mockCubit.removeFavoriteById('id1')).thenAnswer((_) async {});
 
-    // Stub del método para comprobar si se llamó
-    when(() => mockCubit.removeFavoriteById('id1')).thenAnswer((_) async {});
+      await tester.pumpWidget(
+        makeTestable(child: const FavoritesView(), locale: const Locale('en')),
+      );
+      await tester.pumpAndSettle();
 
-    await tester.pumpWidget(makeTestable(child: const FavoritesView()));
-    await tester.pumpAndSettle();
+      final l10n = AppLocalizations.of(
+        tester.element(find.byType(FavoritesView)),
+      );
 
-    await tester.tap(find.byIcon(Icons.delete));
-    await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.delete));
+      await tester.pumpAndSettle();
 
-    final l10n = AppLocalizations.of(
-      tester.element(find.byType(FavoritesView)),
-    );
-    await tester.tap(find.text(l10n.delete));
-    await tester.pumpAndSettle();
+      expect(find.text(l10n.delete), findsOneWidget);
 
-    verify(() => mockCubit.removeFavoriteById('id1')).called(1);
+      await tester.tap(find.text(l10n.delete));
+      await tester.pumpAndSettle();
+
+      verify(() => mockCubit.removeFavoriteById('id1')).called(1);
+    });
   });
 }

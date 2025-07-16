@@ -69,7 +69,9 @@ class _FavoritesViewState extends State<FavoritesView> {
                   leading: SizedBox(
                     width: 56,
                     height: 56,
-                    child: favorite.localPath != null
+                    child: kDebugMode
+                        ? const Placeholder()
+                        : favorite.localPath != null
                         ? Image.file(
                             File(favorite.localPath!),
                             fit: BoxFit.cover,
