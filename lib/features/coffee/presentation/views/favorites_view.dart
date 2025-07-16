@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hensell_coffee_architecture/features/coffee/logic/cubit/coffee_favorites_cubit.dart';
+import 'package:hensell_coffee_architecture/features/coffee/presentation/widgets/confirm_delete_dialog.dart';
 import 'package:hensell_coffee_architecture/l10n/gen/app_localizations.dart';
 
 class FavoritesView extends StatefulWidget {
@@ -25,7 +26,10 @@ class _FavoritesViewState extends State<FavoritesView> {
     final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.favoritesTitle)),
+      appBar: AppBar(
+        title: Text(l10n.favoritesTitle),
+        centerTitle: true,
+      ),
       body: BlocBuilder<CoffeeFavoritesCubit, CoffeeFavoritesState>(
         builder: (context, state) {
           if (state is CoffeeFavoritesLoading) {
@@ -81,10 +85,21 @@ class _FavoritesViewState extends State<FavoritesView> {
                   ),
                   trailing: IconButton(
                     icon: const Icon(Icons.delete),
-                    onPressed: () {
-                      context.read<CoffeeFavoritesCubit>().removeFavoriteById(
-                        favorite.id,
+                    onPressed: () async {
+                      final confirmed = await showConfirmDeleteDialog(
+                        context,
+                        l10n,
                       );
+                      if (!mounted) return;
+                      if (confirmed ?? false) {
+                        // We use if (!mounted) return;
+                        // ignore: use_build_context_synchronously
+                        await context
+                            .read<CoffeeFavoritesCubit>()
+                            .removeFavoriteById(
+                              favorite.id,
+                            );
+                      }
                     },
                   ),
                 );

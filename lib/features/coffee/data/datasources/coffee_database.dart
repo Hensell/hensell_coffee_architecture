@@ -12,6 +12,8 @@ part 'coffee_database.g.dart';
 class CoffeeDatabase extends _$CoffeeDatabase {
   CoffeeDatabase() : super(_openConnection());
 
+  CoffeeDatabase.forTesting(super.e);
+
   @override
   int get schemaVersion => 1;
 

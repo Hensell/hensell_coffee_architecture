@@ -15,7 +15,14 @@
 "noFavoritesYet": "No tienes favoritos aún",
 "loadingFavorites": "Cargando favoritos...",
 "noInternetButFavorites": "No tienes conexión a internet, pero puedes ver tus favoritos",
-"tryAgain": "Volver a intentar"
+"tryAgain": "Volver a intentar",
+"fullImageViewTitle": "Vista completa",
+"confirmDeleteTitle": "Eliminar favorito",
+"confirmDeleteMessage": "¿Estás seguro de que quieres eliminar este favorito? Esta acción no se puede deshacer.",
+"cancel": "Cancelar",
+"delete": "Borrar",
+"noInternetSaveFailed": "No se pudo guardar el favorito porque no hay conexión a internet"
+
 
 
 

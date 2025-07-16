@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:hensell_coffee_architecture/l10n/gen/app_localizations.dart';
 import 'package:photo_view/photo_view.dart';
 
 class FullImageView extends StatelessWidget {
@@ -23,8 +24,8 @@ class FullImageView extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Vista completa'),
-        backgroundColor: Colors.black,
+        title: Text(AppLocalizations.of(context).fullImageViewTitle),
+        centerTitle: true,
       ),
       body: PhotoView(
         imageProvider: provider,

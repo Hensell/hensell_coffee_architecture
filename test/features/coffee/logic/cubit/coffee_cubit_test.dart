@@ -1,76 +1,195 @@
 import 'dart:io';
-import 'package:bloc/bloc.dart';
-import 'package:equatable/equatable.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:bloc_test/bloc_test.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:hensell_coffee_architecture/features/coffee/domain/entities/coffee_favorite.dart';
 import 'package:hensell_coffee_architecture/features/coffee/domain/usecases/fetch_random_coffee_image_url.dart';
 import 'package:hensell_coffee_architecture/features/coffee/domain/usecases/get_favorites.dart';
 import 'package:hensell_coffee_architecture/features/coffee/domain/usecases/save_favorite.dart';
-import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
+import 'package:hensell_coffee_architecture/features/coffee/logic/cubit/coffee_cubit.dart';
+import 'package:mocktail/mocktail.dart';
 
-part 'coffee_state.dart';
+class MockFetchRandomCoffeeImageUrl extends Mock
+    implements FetchRandomCoffeeImageUrl {}
 
-class CoffeeCubit extends Cubit<CoffeeState> {
-  CoffeeCubit({
-    required this.fetchRandomCoffeeImageUrl,
-    required this.saveFavorite,
-    required this.getFavorites,
-  }) : super(CoffeeInitial());
+class MockSaveFavorite extends Mock implements SaveFavorite {}
 
-  final FetchRandomCoffeeImageUrl fetchRandomCoffeeImageUrl;
-  final SaveFavorite saveFavorite;
-  final GetFavorites getFavorites;
+class MockGetFavorites extends Mock implements GetFavorites {}
 
-  Future<void> loadRandomCoffeeImage() async {
-    emit(CoffeeLoading());
-    try {
-      final url = await fetchRandomCoffeeImageUrl();
-      emit(CoffeeLoaded(url));
-    } on SocketException {
-      emit(const CoffeeError('no_internet'));
-    } on Exception catch (e) {
-      emit(CoffeeError(e.toString()));
-    }
-  }
+void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
 
-  Future<void> saveCurrentAsFavorite({required String originalUrl}) async {
-    emit(CoffeeLoading());
-    try {
-      final favorites = await getFavorites();
-      final alreadyFavorite = favorites.any(
-        (fav) => fav.originalUrl == originalUrl,
-      );
+  late CoffeeCubit cubit;
+  late MockFetchRandomCoffeeImageUrl mockFetchRandomCoffeeImageUrl;
+  late MockSaveFavorite mockSaveFavorite;
+  late MockGetFavorites mockGetFavorites;
 
-      if (alreadyFavorite) {
-        emit(FavoriteSavedExists());
-        await loadRandomCoffeeImage();
-        return;
-      }
+  setUp(() {
+    mockFetchRandomCoffeeImageUrl = MockFetchRandomCoffeeImageUrl();
+    mockSaveFavorite = MockSaveFavorite();
+    mockGetFavorites = MockGetFavorites();
+    cubit = CoffeeCubit(
+      fetchRandomCoffeeImageUrl: mockFetchRandomCoffeeImageUrl,
+      saveFavorite: mockSaveFavorite,
+      getFavorites: mockGetFavorites,
+      saveImageToDisk: (_) async => '/tmp/fake.jpg',
+    );
+  });
 
-      String? localPath;
-      var platform = 'web';
-      if (!kIsWeb) {
-        platform = Platform.operatingSystem;
-        final response = await http.get(Uri.parse(originalUrl));
-        final dir = await getApplicationDocumentsDirectory();
-        final fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
-        final filePath = '${dir.path}/$fileName';
-        final file = File(filePath);
-        await file.writeAsBytes(response.bodyBytes);
-        localPath = filePath;
-      }
+  tearDown(() {
+    cubit.close();
+  });
 
-      await saveFavorite(
-        originalUrl: originalUrl,
-        localPath: localPath,
-        platform: platform,
-        createdAt: DateTime.now(),
-      );
-      emit(FavoriteSavedSuccess());
+  group('CoffeeCubit', () {
+    blocTest<CoffeeCubit, CoffeeState>(
+      'emits [CoffeeLoading, CoffeeLoaded] when loadRandomCoffeeImage succeeds',
+      build: () {
+        when(() => mockFetchRandomCoffeeImageUrl()).thenAnswer(
+          (_) async => 'https://coffee.alexflipnote.dev/random.json',
+        );
+        return cubit;
+      },
+      act: (cubit) => cubit.loadRandomCoffeeImage(),
+      expect: () => [
+        isA<CoffeeLoading>(),
+        isA<CoffeeLoaded>().having(
+          (s) => s.imageUrl,
+          'imageUrl',
+          'https://coffee.alexflipnote.dev/random.json',
+        ),
+      ],
+    );
 
-      await loadRandomCoffeeImage();
-    } on Exception catch (e) {
-      emit(CoffeeError('Error al guardar favorito: $e'));
-    }
-  }
+    blocTest<CoffeeCubit, CoffeeState>(
+      'emits [CoffeeLoading, CoffeeError] when a SocketException (no internet) occurs',
+      build: () {
+        when(
+          () => mockFetchRandomCoffeeImageUrl(),
+        ).thenThrow(const SocketException('fail'));
+        return cubit;
+      },
+      act: (cubit) => cubit.loadRandomCoffeeImage(),
+      expect: () => [
+        isA<CoffeeLoading>(),
+        isA<CoffeeError>().having((s) => s.message, 'message', 'no_internet'),
+      ],
+    );
+
+    blocTest<CoffeeCubit, CoffeeState>(
+      'emits [CoffeeLoading, CoffeeError] when any other exception occurs',
+      build: () {
+        when(
+          () => mockFetchRandomCoffeeImageUrl(),
+        ).thenThrow(Exception('something went wrong'));
+        return cubit;
+      },
+      act: (cubit) => cubit.loadRandomCoffeeImage(),
+      expect: () => [
+        isA<CoffeeLoading>(),
+        isA<CoffeeError>().having(
+          (s) => s.message,
+          'message',
+          contains('something went wrong'),
+        ),
+      ],
+    );
+
+    blocTest<CoffeeCubit, CoffeeState>(
+      'emits [CoffeeLoading, FavoriteSavedSuccess, CoffeeLoading, CoffeeLoaded] when saveCurrentAsFavorite succeeds (new favorite)',
+      build: () {
+        when(() => mockGetFavorites()).thenAnswer((_) async => []);
+        when(
+          () => mockSaveFavorite(
+            originalUrl: any(named: 'originalUrl'),
+            localPath: any(named: 'localPath'),
+            platform: any(named: 'platform'),
+            createdAt: any(named: 'createdAt'),
+          ),
+        ).thenAnswer(
+          (_) async => CoffeeFavorite(
+            id: 'id1',
+            originalUrl: 'https://coffee.alexflipnote.dev/random.json',
+            platform: 'web',
+            createdAt: DateTime.now(),
+          ),
+        );
+        when(() => mockFetchRandomCoffeeImageUrl()).thenAnswer(
+          (_) async => 'https://coffee.alexflipnote.dev/random.json',
+        );
+        return cubit;
+      },
+      act: (cubit) => cubit.saveCurrentAsFavorite(
+        originalUrl: 'https://coffee.alexflipnote.dev/random.json',
+      ),
+      expect: () => [
+        isA<CoffeeLoading>(),
+        isA<FavoriteSavedSuccess>(),
+        isA<CoffeeLoading>(),
+        isA<CoffeeLoaded>().having(
+          (s) => s.imageUrl,
+          'imageUrl',
+          'https://coffee.alexflipnote.dev/random.json',
+        ),
+      ],
+    );
+
+    blocTest<CoffeeCubit, CoffeeState>(
+      'emits [CoffeeLoading, FavoriteSavedExists, CoffeeLoading, CoffeeLoaded] when trying to save a duplicated favorite',
+      build: () {
+        when(() => mockGetFavorites()).thenAnswer(
+          (_) async => [
+            CoffeeFavorite(
+              id: 'id1',
+              originalUrl: 'https://coffee.alexflipnote.dev/random.json',
+              platform: 'web',
+              createdAt: DateTime.now(),
+            ),
+          ],
+        );
+        when(() => mockFetchRandomCoffeeImageUrl()).thenAnswer(
+          (_) async => 'https://coffee.alexflipnote.dev/random.json',
+        );
+        return cubit;
+      },
+      act: (cubit) => cubit.saveCurrentAsFavorite(
+        originalUrl: 'https://coffee.alexflipnote.dev/random.json',
+      ),
+      expect: () => [
+        isA<CoffeeLoading>(),
+        isA<FavoriteSavedExists>(),
+        isA<CoffeeLoading>(),
+        isA<CoffeeLoaded>().having(
+          (s) => s.imageUrl,
+          'imageUrl',
+          'https://coffee.alexflipnote.dev/random.json',
+        ),
+      ],
+    );
+
+    blocTest<CoffeeCubit, CoffeeState>(
+      'emits [CoffeeLoading, CoffeeError] when saveFavorite throws exception',
+      build: () {
+        when(() => mockGetFavorites()).thenAnswer((_) async => []);
+        when(
+          () => mockSaveFavorite(
+            originalUrl: any(named: 'originalUrl'),
+            localPath: any(named: 'localPath'),
+            platform: any(named: 'platform'),
+            createdAt: any(named: 'createdAt'),
+          ),
+        ).thenThrow(Exception('fail'));
+        return cubit;
+      },
+      act: (cubit) => cubit.saveCurrentAsFavorite(
+        originalUrl: 'https://coffee.alexflipnote.dev/random.json',
+      ),
+      expect: () => [
+        isA<CoffeeLoading>(),
+        isA<CoffeeError>().having(
+          (s) => s.message,
+          'message',
+          contains('fail'),
+        ),
+      ],
+    );
+  });
 }

@@ -1,7 +1,7 @@
 import 'package:go_router/go_router.dart';
 import 'package:hensell_coffee_architecture/features/coffee/presentation/views/coffee_page.dart';
-import 'package:hensell_coffee_architecture/features/coffee/presentation/views/favorites_view.dart';
-import 'package:hensell_coffee_architecture/features/coffee/presentation/views/full_image_view.dart';
+import 'package:hensell_coffee_architecture/features/coffee/presentation/views/favorites_page.dart';
+import 'package:hensell_coffee_architecture/features/coffee/presentation/widgets/full_image_view.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
@@ -13,7 +13,7 @@ final GoRouter appRouter = GoRouter(
         GoRoute(
           path: 'favorites',
           name: 'favorites',
-          builder: (context, state) => const FavoritesView(),
+          builder: (context, state) => const FavoritesPage(),
         ),
         GoRoute(
           path: 'full_image',
